@@ -38,6 +38,7 @@ public:
     const std::vector<Elf_Phdr*> phdrs() const { return phdrs_; }
     std::vector<Elf_Phdr*> phdrs_mut() const { return phdrs_; }
     const std::vector<Elf_Phdr*> loads() const { return loads_; }
+    const Elf_Phdr* dynamic() const { return dynamic_; }
     const Elf_Phdr* tls() const { return tls_; }
     const Elf_Phdr* gnu_stack() const { return gnu_stack_; }
     const Elf_Phdr* gnu_relro() const { return gnu_relro_; }
@@ -59,6 +60,8 @@ public:
     size_t num_plt_rels() const { return num_plt_rels_; }
     const EHFrameHeader* eh_frame_header() const { return &eh_frame_header_; }
     const char* strtab() const { return strtab_; }
+    const size_t dt_strtab() const { return dt_strtab_; }
+    const size_t strsz() const { return strsz_; }
 
     const char* head() const { return head_; }
     char* head_mut() const { return head_; }
@@ -126,10 +129,13 @@ private:
     Elf_Ehdr* ehdr_{nullptr};
     std::vector<Elf_Phdr*> phdrs_;
     std::vector<Elf_Phdr*> loads_;
+    Elf_Phdr* dynamic_{nullptr};
     Elf_Phdr* tls_{nullptr};
     Elf_Phdr* gnu_stack_{nullptr};
     Elf_Phdr* gnu_relro_{nullptr};
     const char* strtab_{nullptr};
+    size_t dt_strtab_{0};  // For delete_unused_DT_STRTAB option
+    size_t strsz_{0};
     Elf_Sym* symtab_{nullptr};
 
     EHFrameHeader eh_frame_header_;
