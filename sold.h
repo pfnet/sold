@@ -16,6 +16,7 @@
 #include <libgen.h>
 #include <sys/stat.h>
 
+#include <cstring>
 #include <iostream>
 #include <map>
 #include <string>
@@ -35,7 +36,8 @@
 class Sold {
 public:
     Sold(const std::string& elf_filename, const std::vector<std::string>& exclude_sos, const std::vector<std::string>& exclude_finis,
-         const std::vector<std::string> custome_library_path, bool emit_section_header);
+         const std::vector<std::string> custome_library_path, const std::vector<std::string>& exclude_runpath_pattern,
+         bool emit_section_header, bool delete_unused_DT_STRTAB);
 
     void Link(const std::string& out_filename);
 
@@ -206,6 +208,8 @@ private:
 
     void BuildArrays();
 
+    std::string BuildRunpath();
+
     void BuildDynamic();
 
     void EmitPhdrs(FILE* fp);
@@ -270,9 +274,23 @@ private:
             ELFBinary* bin = load.bin;
             Elf_Phdr* phdr = load.orig;
             LOG(INFO) << "Emitting code of " << bin->name() << " from " << HexString(ftell(fp)) << " => " << HexString(load.emit.p_offset)
-                      << " + " << HexString(phdr->p_filesz);
+                      << " + " << HexString(phdr->p_filesz) << SOLD_LOG_KEY(delete_unused_DT_STRTAB_);
             EmitPad(fp, load.emit.p_offset);
-            WriteBuf(fp, bin->head() + phdr->p_offset, phdr->p_filesz);
+
+            std::vector<char> buf(phdr->p_filesz, 0);
+            std::memcpy(buf.data(), bin->head() + phdr->p_offset, phdr->p_filesz);
+            if (delete_unused_DT_STRTAB_) {
+                LOG(INFO) << SOLD_LOG_BITS(phdr->p_offset) << SOLD_LOG_BITS(bin->dt_strtab())
+                          << SOLD_LOG_BITS(bin->dt_strtab() + bin->strsz()) << SOLD_LOG_BITS(phdr->p_offset + phdr->p_filesz);
+                if (phdr->p_offset <= bin->dt_strtab() && bin->dt_strtab() + bin->strsz() <= phdr->p_offset + phdr->p_filesz) {
+                    LOG(INFO) << "Delete unused DT_STRTAB: " << SOLD_LOG_KEY(bin->dt_strtab() - phdr->p_offset)
+                              << SOLD_LOG_KEY(bin->dt_strtab() - phdr->p_offset + bin->strsz()) << SOLD_LOG_KEY(bin->strsz());
+                    for (int i = bin->dt_strtab() - phdr->p_offset; i < bin->dt_strtab() - phdr->p_offset + bin->strsz(); i++) {
+                        buf[i] = '\0';
+                    }
+                }
+            }
+            WriteBuf(fp, buf.data(), phdr->p_filesz);
         }
     }
 
@@ -440,6 +458,7 @@ private:
     const std::vector<std::string> exclude_sos_;
     const std::vector<std::string> exclude_finis_;
     const std::vector<std::string> custome_library_path_;
+    const std::vector<std::string> exclude_runpath_pattern_;
     std::map<std::string, std::unique_ptr<ELFBinary>> libraries_;
     std::vector<ELFBinary*> link_binaries_;
     std::map<const ELFBinary*, uintptr_t> offsets_;
@@ -453,6 +472,7 @@ private:
     uintptr_t mprotect_offset_{0};
     bool is_executable_{false};
     bool emit_section_header_;
+    bool delete_unused_DT_STRTAB_{false};
 
     uintptr_t interp_offset_;
     SymtabBuilder syms_;

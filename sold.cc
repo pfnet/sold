@@ -21,11 +21,14 @@
 #include <set>
 
 Sold::Sold(const std::string& elf_filename, const std::vector<std::string>& exclude_sos, const std::vector<std::string>& exclude_finis,
-           const std::vector<std::string> custome_library_path, bool emit_section_header)
+           const std::vector<std::string> custome_library_path, const std::vector<std::string>& exclude_runpath_pattern,
+           bool emit_section_header, bool delete_unused_DT_STRTAB)
     : exclude_sos_(exclude_sos),
       exclude_finis_(exclude_finis),
       custome_library_path_(custome_library_path),
-      emit_section_header_(emit_section_header) {
+      exclude_runpath_pattern_(exclude_runpath_pattern),
+      emit_section_header_(emit_section_header),
+      delete_unused_DT_STRTAB_(delete_unused_DT_STRTAB) {
     main_binary_ = ReadELF(elf_filename);
     is_executable_ = main_binary_->FindPhdr(PT_INTERP);
     machine_type = main_binary_->ehdr()->e_machine;
@@ -188,6 +191,23 @@ void Sold::BuildArrays() {
     rels_.emplace_back(mprotect_rel);
 }
 
+std::string Sold::BuildRunpath() {
+    std::string runpath;
+    for (const ELFBinary* b : link_binaries_) {
+        std::vector<std::string> runpaths = SplitString(b->runpath(), ":");
+        for (const auto rp : runpaths) {
+            bool matched = false;
+            for (const auto pattern : exclude_runpath_pattern_) {
+                if (rp.find(pattern) != std::string::npos) matched = true;
+            }
+            if (!matched) {
+                runpath += rp + ":";
+            }
+        }
+    }
+    return runpath;
+}
+
 void Sold::BuildDynamic() {
     std::set<ELFBinary*> linked(link_binaries_.begin(), link_binaries_.end());
     std::set<std::string> neededs;
@@ -208,7 +228,7 @@ void Sold::BuildDynamic() {
         MakeDyn(DT_RPATH, AddStr(main_binary_->rpath()));
     }
     if (!main_binary_->runpath().empty()) {
-        MakeDyn(DT_RUNPATH, AddStr(main_binary_->runpath()));
+        MakeDyn(DT_RUNPATH, AddStr(BuildRunpath()));
     }
 
     if (uintptr_t ptr = main_binary_->init()) {
@@ -643,8 +663,7 @@ void Sold::RelocateSymbol_x86_64(ELFBinary* bin, const Elf_Rel* rel, uintptr_t o
                     break;
                 }
 
-                uint64_t* mod_on_got =
-                    reinterpret_cast<uint64_t*>(bin->head_mut() + bin->OffsetFromAddr(rel->r_offset));
+                uint64_t* mod_on_got = reinterpret_cast<uint64_t*>(bin->head_mut() + bin->OffsetFromAddr(rel->r_offset));
                 uint64_t* offset_on_got = mod_on_got + 1;
                 const bool is_bss = bin->IsOffsetInTLSBSS(*offset_on_got);
 

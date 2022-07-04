@@ -71,13 +71,19 @@ Range ELFBinary::GetRange() const {
 }
 
 bool ELFBinary::IsAddrInInitarray(uintptr_t addr) const {
-    CHECK(init_array_addr_ != 0) << SOLD_LOG_KEY(filename_);
+    if (init_array_addr_ == 0) {
+        LOG(WARNING) << SOLD_LOG_KEY(init_array_addr_) << SOLD_LOG_KEY(filename_);
+        return false;
+    }
     LOG(INFO) << SOLD_LOG_BITS(addr) << SOLD_LOG_BITS(init_array_addr_) << SOLD_LOG_BITS(init_arraysz_);
     return reinterpret_cast<uintptr_t>(init_array_addr_) <= addr && addr < reinterpret_cast<uintptr_t>(init_array_addr_ + init_arraysz_);
 }
 
 bool ELFBinary::IsAddrInFiniarray(uintptr_t addr) const {
-    CHECK(fini_array_addr_ != 0);
+    if (fini_array_addr_ == 0) {
+        LOG(WARNING) << SOLD_LOG_KEY(fini_array_addr_) << SOLD_LOG_KEY(filename_);
+        return false;
+    }
     LOG(INFO) << SOLD_LOG_BITS(addr) << SOLD_LOG_BITS(fini_array_addr_) << SOLD_LOG_BITS(fini_arraysz_);
     return reinterpret_cast<uintptr_t>(fini_array_addr_) <= addr && addr < reinterpret_cast<uintptr_t>(fini_array_addr_ + fini_arraysz_);
 }
@@ -340,6 +346,7 @@ void ELFBinary::ParsePhdrs() {
 
     for (Elf_Phdr* phdr : phdrs_) {
         if (phdr->p_type == PT_DYNAMIC) {
+            dynamic_ = phdr;
             ParseDynamic(phdr->p_offset, phdr->p_filesz);
         } else if (phdr->p_type == PT_INTERP) {
             LOG(INFO) << "Found PT_INTERP.";
@@ -522,6 +529,9 @@ void ELFBinary::ParseDynamic(size_t off, size_t size) {
         auto get_ptr = [this, dyn]() { return GetPtr(dyn->d_un.d_ptr); };
         if (dyn->d_tag == DT_STRTAB) {
             strtab_ = get_ptr();
+            dt_strtab_ = dyn->d_un.d_ptr;
+        } else if (dyn->d_tag == DT_STRSZ) {
+            strsz_ = dyn->d_un.d_val;
         } else if (dyn->d_tag == DT_SYMTAB) {
             symtab_ = reinterpret_cast<Elf_Sym*>(get_ptr());
         } else if (dyn->d_tag == DT_GNU_HASH) {
@@ -567,7 +577,7 @@ void ELFBinary::ParseDynamic(size_t off, size_t size) {
             verdefnum_ = dyn->d_un.d_val;
         }
     }
-    CHECK(strtab_);
+    CHECK(strtab_ && strsz_);
 
     ParseFuncArray(init_array_offset_, init_arraysz_, &init_array_);
     ParseFuncArray(fini_array_offset_, fini_arraysz_, &fini_array_);
