@@ -286,7 +286,7 @@ private:
                     LOG(INFO) << "Delete unused DT_STRTAB: " << SOLD_LOG_KEY(bin->dt_strtab() - phdr->p_offset)
                               << SOLD_LOG_KEY(bin->dt_strtab() - phdr->p_offset + bin->strsz()) << SOLD_LOG_KEY(bin->strsz());
                     for (int i = bin->dt_strtab() - phdr->p_offset; i < bin->dt_strtab() - phdr->p_offset + bin->strsz(); i++) {
-                        buf[i] = 'Y';
+                        buf[i] = '\0';
                     }
                 }
             }
