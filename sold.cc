@@ -20,10 +20,11 @@
 #include <queue>
 #include <set>
 
-Sold::Sold(const std::string& elf_filename, const std::vector<std::string>& exclude_sos, const std::vector<std::string>& exclude_finis,
-           const std::vector<std::string> custome_library_path, const std::vector<std::string>& exclude_runpath_pattern,
-           bool emit_section_header, bool delete_unused_DT_STRTAB)
+Sold::Sold(const std::string& elf_filename, const std::vector<std::string>& exclude_sos, const std::vector<std::string>& exclude_dirs,
+           const std::vector<std::string>& exclude_finis, const std::vector<std::string> custome_library_path,
+           const std::vector<std::string>& exclude_runpath_pattern, bool emit_section_header, bool delete_unused_DT_STRTAB)
     : exclude_sos_(exclude_sos),
+      exclude_dirs_(exclude_dirs),
       exclude_finis_(exclude_finis),
       custome_library_path_(custome_library_path),
       exclude_runpath_pattern_(exclude_runpath_pattern),
@@ -1021,7 +1022,7 @@ void Sold::ResolveLibraryPaths(ELFBinary* root_binary) {
                 LOG(FATAL) << "Empty filename or soname: " << SOLD_LOG_KEY(library->name()) << SOLD_LOG_KEY(library->soname());
             }
 
-            if (ShouldLink(library->soname())) {
+            if (ShouldLink(library->soname(), library->filename())) {
                 link_binaries_buf.emplace_back(needed, library.get());
             }
 
@@ -1036,7 +1037,7 @@ void Sold::ResolveLibraryPaths(ELFBinary* root_binary) {
     link_binaries_ = TopologicalSort(link_binaries_buf);
 }
 
-bool Sold::ShouldLink(const std::string& soname) {
+bool Sold::ShouldLink(const std::string& soname, const std::string& filepath) {
     for (const std::string& prefix : EXCLUDE_SHARED_OBJECTS) {
         if (HasPrefix(soname, prefix)) {
             return false;
@@ -1044,6 +1045,11 @@ bool Sold::ShouldLink(const std::string& soname) {
     }
     for (const std::string& prefix : exclude_sos_) {
         if (HasPrefix(soname, prefix)) {
+            return false;
+        }
+    }
+    for (const std::string& prefix : exclude_dirs_) {
+        if (HasPrefix(filepath, prefix)) {
             return false;
         }
     }
