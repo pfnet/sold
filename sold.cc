@@ -611,7 +611,7 @@ void Sold::RelocateSymbol_x86_64(ELFBinary* bin, const Elf_Rel* rel, uintptr_t o
         newrels.emplace_back(newrel);
     }
 
-    LOG(INFO) << "Relocate " << bin->Str(sym->st_name) << " at " << rel->r_offset;
+    VLOG(3) << "Relocate " << bin->Str(sym->st_name) << " at " << rel->r_offset;
 
     for (auto newrel : newrels) {
         // Even if we found a defined symbol in src_syms_, we cannot

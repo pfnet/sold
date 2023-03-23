@@ -75,7 +75,7 @@ bool ELFBinary::IsAddrInInitarray(uintptr_t addr) const {
         LOG(WARNING) << SOLD_LOG_KEY(init_array_addr_) << SOLD_LOG_KEY(filename_);
         return false;
     }
-    LOG(INFO) << SOLD_LOG_BITS(addr) << SOLD_LOG_BITS(init_array_addr_) << SOLD_LOG_BITS(init_arraysz_);
+    VLOG(3) << SOLD_LOG_BITS(addr) << SOLD_LOG_BITS(init_array_addr_) << SOLD_LOG_BITS(init_arraysz_);
     return reinterpret_cast<uintptr_t>(init_array_addr_) <= addr && addr < reinterpret_cast<uintptr_t>(init_array_addr_ + init_arraysz_);
 }
 
@@ -84,7 +84,7 @@ bool ELFBinary::IsAddrInFiniarray(uintptr_t addr) const {
         LOG(WARNING) << SOLD_LOG_KEY(fini_array_addr_) << SOLD_LOG_KEY(filename_);
         return false;
     }
-    LOG(INFO) << SOLD_LOG_BITS(addr) << SOLD_LOG_BITS(fini_array_addr_) << SOLD_LOG_BITS(fini_arraysz_);
+    VLOG(3) << SOLD_LOG_BITS(addr) << SOLD_LOG_BITS(fini_array_addr_) << SOLD_LOG_BITS(fini_arraysz_);
     return reinterpret_cast<uintptr_t>(fini_array_addr_) <= addr && addr < reinterpret_cast<uintptr_t>(fini_array_addr_ + fini_arraysz_);
 }
 
@@ -223,12 +223,12 @@ const Elf_Phdr& ELFBinary::GetPhdr(uint64_t type) {
 
 // GetVersion returns (soname, version)
 std::pair<std::string, std::string> ELFBinary::GetVersion(int index, const std::map<std::string, std::string>& filename_to_soname) {
-    LOG(INFO) << "GetVersion";
+    VLOG(3) << "GetVersion";
     if (!versym_) {
         return std::make_pair("", "");
     }
 
-    LOG(INFO) << SOLD_LOG_KEY(versym_[index]);
+    VLOG(3) << SOLD_LOG_KEY(versym_[index]);
 
     if (is_special_ver_ndx(versym_[index])) {
         return std::make_pair("", "");
@@ -240,7 +240,7 @@ std::pair<std::string, std::string> ELFBinary::GetVersion(int index, const std::
                           << SOLD_LOG_KEY(strtab_ + vn->vn_file) << SOLD_LOG_KEY(vn->vn_aux) << SOLD_LOG_KEY(vn->vn_next);
                 Elf_Vernaux* vna = (Elf_Vernaux*)((char*)vn + vn->vn_aux);
                 for (int j = 0; j < vn->vn_cnt; ++j) {
-                    LOG(INFO) << "Elf_Vernaux: " << SOLD_LOG_KEY(vna->vna_hash) << SOLD_LOG_KEY(vna->vna_flags)
+                    VLOG(3) << "Elf_Vernaux: " << SOLD_LOG_KEY(vna->vna_hash) << SOLD_LOG_KEY(vna->vna_flags)
                               << SOLD_LOG_KEY(vna->vna_other) << SOLD_LOG_KEY(strtab_ + vna->vna_name) << SOLD_LOG_KEY(vna->vna_next);
 
                     if (vna->vna_other == versym_[index]) {
@@ -401,7 +401,7 @@ void ELFBinary::ParseEHFrameHeader(size_t off, size_t size) {
         efh_read(&e.fde_ptr);
         eh_frame_header_.table.emplace_back(e);
 
-        LOG(INFO) << SOLD_LOG_32BITS(e.initial_loc) << SOLD_LOG_32BITS(e.fde_ptr) << SOLD_LOG_32BITS(off + e.fde_ptr)
+        VLOG(3) << SOLD_LOG_32BITS(e.initial_loc) << SOLD_LOG_32BITS(e.fde_ptr) << SOLD_LOG_32BITS(off + e.fde_ptr)
                   << SOLD_LOG_32BITS(AddrFromOffset(off)) << SOLD_LOG_32BITS(AddrFromOffset(off) + e.fde_ptr)
                   << SOLD_LOG_32BITS(OffsetFromAddr(AddrFromOffset(off) + e.fde_ptr));
 
@@ -449,7 +449,7 @@ void ELFBinary::ParseEHFrameHeader(size_t off, size_t size) {
             aug_head++;
             cie_offset++;
 
-            LOG(INFO) << SOLD_LOG_8BITS(*(cie_base + cie_offset)) << SOLD_LOG_KEY(*aug_head);
+            VLOG(3) << SOLD_LOG_8BITS(*(cie_base + cie_offset)) << SOLD_LOG_KEY(*aug_head);
 
             // Copy from sysdeps/generic/unwind-dw2-fde.c in glibc
             while (1) {
@@ -476,7 +476,7 @@ void ELFBinary::ParseEHFrameHeader(size_t off, size_t size) {
 
         fde_read(&fde.initial_loc);
 
-        LOG(INFO) << "ParseEHFrameHeader table[" << i << "] = {" << SOLD_LOG_32BITS(e.initial_loc) << SOLD_LOG_32BITS(e.fde_ptr)
+        VLOG(3) << "ParseEHFrameHeader table[" << i << "] = {" << SOLD_LOG_32BITS(e.initial_loc) << SOLD_LOG_32BITS(e.fde_ptr)
                   << "} FDE = {" << SOLD_LOG_32BITS(fde.length) << SOLD_LOG_64BITS(fde.extended_length) << SOLD_LOG_32BITS(fde.CIE_delta)
                   << SOLD_LOG_32BITS(fde.initial_loc) << "} CIE = {" << SOLD_LOG_32BITS(cie.length) << SOLD_LOG_32BITS(cie.CIE_id)
                   << SOLD_LOG_8BITS(cie.version) << SOLD_LOG_KEY(cie.aug_str) << SOLD_LOG_DWEHPE(cie.FDE_encoding)
