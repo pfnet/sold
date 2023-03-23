@@ -64,7 +64,7 @@ public:
             new_te.fde_ptr = static_cast<int32_t>(efh_vaddr) + te.fde_ptr + static_cast<int32_t>(load_offset) - new_efh_vaddr;
             new_te.initial_loc = static_cast<int32_t>(efh_vaddr) + te.initial_loc + static_cast<int32_t>(load_offset) - new_efh_vaddr;
             eh_frame_header_.table.emplace_back(new_te);
-            LOG(INFO) << "EHFrameBuilder" << SOLD_LOG_BITS(new_te.fde_ptr) << SOLD_LOG_BITS(new_te.initial_loc);
+            VLOG(3) << "EHFrameBuilder" << SOLD_LOG_BITS(new_te.fde_ptr) << SOLD_LOG_BITS(new_te.initial_loc);
         }
     }
 
