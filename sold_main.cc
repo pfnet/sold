@@ -23,13 +23,14 @@ Options:
 -h, --help                      Show this help message and exit
 -o, --output-file OUTPUT_FILE   Specify the ELF file to output (this option is mandatory)
 -i, --input-file INPUT_FILE     Specify the ELF file to input
--e, --exclude-so EXCLUDE_FILE   Specify the ELF file to exclude (e.g. libmax.so) 
+-e, --exclude-so EXCLUDE_FILE   Specify the ELF file to exclude (e.g. libmax.so)
 -L, --custom-library-path PATH  Use PATH instead of the default path such as /usr/lib
 --section-headers               Emit section headers
 --check-output                  Check the output using sold itself
 --exclude-from-fini             Do not use .fini_array of the ELF file
 --exclude-runpath-contains      Exclude paths from DT_RUNPATH contains the argument
 --delete-unused-PT_DYNAMIC      Zero pads unused PT_DYNAMIC
+--exclude-dir                   Exclude all SOs in this directory
 
 The last argument is interpreted as SOURCE_FILE when -i option isn't given.
 )" << std::endl;
@@ -49,12 +50,14 @@ int main(int argc, char* const argv[]) {
         {"exclude-from-fini", required_argument, nullptr, 3},
         {"exclude-runpath-contains", required_argument, nullptr, 4},
         {"delete-unused-DT_STRTAB", no_argument, nullptr, 5},
+        {"exclude-dir", required_argument, nullptr, 6},
         {0, 0, 0, 0},
     };
 
     std::string input_file;
     std::string output_file;
     std::vector<std::string> exclude_sos;
+    std::vector<std::string> exclude_dirs;
     std::vector<std::string> exclude_finis;
     std::vector<std::string> custome_library_path;
     std::vector<std::string> exclude_runpath_pattern;
@@ -79,6 +82,9 @@ int main(int argc, char* const argv[]) {
                 break;
             case 5:
                 delete_unused_DT_STRTAB = true;
+                break;
+            case 6:
+                exclude_dirs.emplace_back(optarg);
                 break;
             case 'e':
                 exclude_sos.push_back(optarg);
@@ -110,14 +116,14 @@ int main(int argc, char* const argv[]) {
         return 1;
     }
 
-    Sold sold(input_file, exclude_sos, exclude_finis, custome_library_path, exclude_runpath_pattern, emit_section_header,
+    Sold sold(input_file, exclude_sos, exclude_dirs, exclude_finis, custome_library_path, exclude_runpath_pattern, emit_section_header,
               delete_unused_DT_STRTAB);
     sold.Link(output_file);
 
     if (check_output) {
         std::string dummy = output_file + ".dummy-for-check-output";
-        Sold check(output_file, exclude_sos, exclude_finis, custome_library_path, exclude_runpath_pattern, emit_section_header,
-                   delete_unused_DT_STRTAB);
+        Sold check(output_file, exclude_sos, exclude_dirs, exclude_finis, custome_library_path, exclude_runpath_pattern,
+                   emit_section_header, delete_unused_DT_STRTAB);
         check.Link(dummy);
         std::remove(dummy.c_str());
     }
