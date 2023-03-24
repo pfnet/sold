@@ -112,3 +112,7 @@ endif()
 if(SOLD_LIBTORCH_TEST)
     add_subdirectory(libtorch_test)
 endif()
+
+if(SOLD_PYBIND_TEST AND SOLD_LIBTORCH_TEST)
+    add_subdirectory(pybind_libtorch_test)
+endif()
