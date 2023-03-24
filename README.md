@@ -81,8 +81,7 @@ ctest
 git clone https://github.com/akawashiro/sold.git
 cd sold
 mkdir -p build
-cd build
-cmake -DCMAKE_PREFIX_PATH=/absolute/path/to/libtorch/dir -DSOLD_LIBTORCH_TEST=ON -GNinja ..
+cmake -DCMAKE_PREFIX_PATH=/absolute/path/to/libtorch/dir -DSOLD_LIBTORCH_TEST=ON -GNinja -B build -S .
 ninja
 ```
 
