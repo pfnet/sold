@@ -14,7 +14,8 @@ file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/soldout")
 add_custom_target(
   my_add_kernel_soldout ALL
   COMMAND
-    "${PROJECT_BINARY_DIR}/sold" -i "${CMAKE_CURRENT_BINARY_DIR}/my_add_kernel.so" -o
+    "${PROJECT_BINARY_DIR}/sold" -i
+    "${CMAKE_CURRENT_BINARY_DIR}/my_add_kernel.so" -o
     "${CMAKE_CURRENT_BINARY_DIR}/soldout/my_add_kernel.so" --section-headers
     --check-output
   DEPENDS sold my_add_kernel)
