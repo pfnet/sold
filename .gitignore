@@ -4,3 +4,7 @@
 *.soldout
 *.o
 *.out
+pytorch
+pytorch-build
+pytorch-install
+.cache

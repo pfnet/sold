@@ -71,20 +71,31 @@ The purpose of this test is to check `sold` can preserve the complex ABI.
 git clone https://github.com/akawashiro/sold.git
 cd sold
 mkdir -p build
-cd build
-cmake .. -DSOLD_PYBIND_TEST=ON
-make
-ctest
+cmake -S . -B build -DSOLD_PYBIND_TEST=ON -G Ninja
+cmake --build build
+ctest --test-dir build
 ```
 ## libtorch test
+Note: You can generate libtorch using `./build-pytorch.sh`. This script install libtorch to `sold/pytorch-install`.
 ```
 git clone https://github.com/akawashiro/sold.git
 cd sold
 mkdir -p build
-cd build
-cmake -DCMAKE_PREFIX_PATH=/absolute/path/to/libtorch/dir -DSOLD_LIBTORCH_TEST=ON -GNinja ..
-ninja
+cmake -B build -S . -DCMAKE_PREFIX_PATH=/absolute/path/to/libtorch/dir -DSOLD_LIBTORCH_TEST=ON -GNinja
+cmake --build build
+ctest --test-dir build
 ```
+## pybind + libtorch test
+Note: You can generate libtorch using `./build-pytorch.sh`. This script install libtorch to `sold/pytorch-install`.
+```
+git clone https://github.com/akawashiro/sold.git
+cd sold
+mkdir -p build
+cmake -DCMAKE_PREFIX_PATH=/absolute/path/to/libtorch/dir -DSOLD_LIBTORCH_TEST=ON -DSOLD_PYBIND_TEST=ON -GNinja -B build -S .
+cmake --build build
+ctest --test-dir build
+```
+
 
 ## Test with Docker
 ```
