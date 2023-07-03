@@ -311,9 +311,9 @@ void Sold::EmitPhdrs(FILE* fp) {
         phdr.p_offset = tls_file_offset_;
         phdr.p_vaddr = tls_offset_;
         phdr.p_paddr = tls_offset_;
-        phdr.p_filesz = tls_.filesz;
+        phdr.p_filesz = tls_.memsz;
         phdr.p_memsz = tls_.memsz;
-        phdr.p_align = 0x1000;
+        phdr.p_align = TLS_ALIGN;
         phdr.p_type = PT_TLS;
         phdr.p_flags = PF_R;
         phdrs.push_back(phdr);
@@ -402,7 +402,7 @@ uintptr_t Sold::TLSMemSize() const {
     for (ELFBinary* bin : link_binaries_) {
         for (Elf_Phdr* phdr : bin->phdrs()) {
             if (phdr->p_type == PT_TLS) {
-                s += phdr->p_memsz;
+                s += (phdr->p_memsz + (TLS_ALIGN - 1)) / TLS_ALIGN * TLS_ALIGN;
             }
         }
     }
@@ -429,27 +429,32 @@ void Sold::DecideMemOffset() {
 }
 
 void Sold::CollectTLS() {
-    uintptr_t bss_offset = 0;
     for (ELFBinary* bin : link_binaries_) {
         for (Elf_Phdr* phdr : bin->phdrs()) {
             if (phdr->p_type == PT_TLS) {
+                CHECK_LE(phdr->p_align, TLS_ALIGN) << SOLD_LOG_KEY(bin->filename());
+
                 uint8_t* start = reinterpret_cast<uint8_t*>(bin->GetPtr(phdr->p_vaddr));
-                size_t size = phdr->p_filesz;
-                uintptr_t file_offset = tls_.filesz;
+                size_t memsz = (phdr->p_memsz + (TLS_ALIGN - 1)) / TLS_ALIGN * TLS_ALIGN;
+                size_t filesz = (phdr->p_filesz + (TLS_ALIGN - 1)) / TLS_ALIGN * TLS_ALIGN;
+                uintptr_t file_offset = tls_.memsz;
                 CHECK(tls_.bin_to_index.emplace(bin, tls_.data.size()).second);
-                tls_.data.push_back({bin, start, size, file_offset, bss_offset});
-                tls_.memsz += phdr->p_memsz;
-                tls_.filesz += size;
-                bss_offset += phdr->p_memsz - size;
+                tls_.data.emplace_back(TLS::Data{.bin = bin,
+                                                 .start = start,
+                                                 .size = phdr->p_filesz,
+                                                 .padded_size = memsz,
+                                                 .file_offset = file_offset,
+                                                 .bss_offset = file_offset + phdr->p_filesz});
+                tls_.memsz += memsz;
+                tls_.filesz += memsz;
             }
         }
     }
     SOLD_CHECK_EQ(tls_.memsz, TLSMemSize());
 
     for (TLS::Data& d : tls_.data) {
-        d.bss_offset += tls_.filesz;
-        LOG(INFO) << "TLS of " << d.bin->name() << ": file=" << HexString(d.file_offset) << " + " << HexString(d.size)
-                  << " mem=" << HexString(d.bss_offset);
+        LOG(INFO) << "TLS::Data " << d.bin->name() << SOLD_LOG_BITS(d.start) << SOLD_LOG_BITS(d.size) << SOLD_LOG_BITS(d.padded_size)
+                  << SOLD_LOG_BITS(d.file_offset) << SOLD_LOG_BITS(d.bss_offset);
     }
 
     LOG(INFO) << "TLS: filesz=" << HexString(tls_.filesz) << " memsz=" << HexString(tls_.memsz) << " cnt=" << HexString(tls_.data.size());
@@ -727,7 +732,8 @@ void Sold::RelocateSymbol_x86_64(ELFBinary* bin, const Elf_Rel* rel, uintptr_t o
                     // [bin->tls()->p_filesz, bin->tls()->p_memsz) to
                     // [tls_.data[tls_.bin_to_index[bin]].bss_offset,
                     //  tls_.data[tls_.bin_to_index[bin]].bss_offset + bin->tls()->p_memsz - bin->tls()->p_filesz)
-                    *offset_on_got += tls_.data[tls_.bin_to_index[bin]].bss_offset - bin->tls()->p_filesz;
+                    *offset_on_got +=
+                        tls_.data[tls_.bin_to_index[bin]].bss_offset - bin->tls()->p_filesz;
                 } else {
                     // TLS variables with initial values are remapped from
                     // [0, bin->tls()->p_filesz) to
@@ -860,7 +866,8 @@ void Sold::RelocateSymbol_aarch64(ELFBinary* bin, const Elf_Rel* rel, uintptr_t 
                     if (is_bss) {
                         LOG(INFO) << "R_AARCH64_TLSDESC" << SOLD_LOG_BITS(newrel.r_addend)
                                   << SOLD_LOG_BITS(tls_.data[tls_.bin_to_index[bin]].bss_offset - bin->tls()->p_filesz);
-                        newrel.r_addend += tls_.data[tls_.bin_to_index[bin]].bss_offset - bin->tls()->p_filesz;
+                        newrel.r_addend +=
+                            tls_.data[tls_.bin_to_index[bin]].bss_offset - bin->tls()->p_filesz;
                     } else {
                         LOG(INFO) << "R_AARCH64_TLSDESC" << SOLD_LOG_BITS(newrel.r_addend)
                                   << SOLD_LOG_BITS(tls_.data[tls_.bin_to_index[bin]].file_offset);
