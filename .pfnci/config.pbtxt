@@ -1,0 +1,19 @@
+configs {
+    key: "sold.gpu",
+    value {
+        requirement {
+            cpu: 8
+            memory: 32
+            disk: 50
+            gpu: 1
+        }
+        checkout_strategy {
+            ignore_gitignore: true
+            include_dot_git: true
+        }
+        time_limit: {
+            seconds: 3600
+        }
+        command: "bash .pfnci/run_gpu_test.sh"
+    }
+}
