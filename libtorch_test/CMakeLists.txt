@@ -23,8 +23,8 @@ add_custom_target(
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_target(
-  torch_test_soldout_wo_section ALL
-  # EXCLUDE_FROM_ALL
+  torch_test_soldout_wo_section
+  EXCLUDE_FROM_ALL
   COMMAND
     GLOG_log_dir=${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/sold -i
     ${CMAKE_CURRENT_BINARY_DIR}/libtorch_test.so.original -o
