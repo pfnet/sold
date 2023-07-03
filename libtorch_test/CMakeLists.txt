@@ -2,8 +2,8 @@ find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 if(NOT SOLD_CPU_ONLY_LIBTORCH)
-    add_subdirectory(cuBLASLt_test)
-    add_subdirectory(cuBLAS_test)
+  add_subdirectory(cuBLASLt_test)
+  add_subdirectory(cuBLAS_test)
 endif()
 
 add_library(torch_test SHARED torch_test.cc)
@@ -29,7 +29,9 @@ add_custom_target(
     GLOG_log_dir=${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/sold -i
     ${CMAKE_CURRENT_BINARY_DIR}/libtorch_test.so.original -o
     ${CMAKE_CURRENT_BINARY_DIR}/libtorch_test.so.wosection.soldout
-    --check-output --exclude-so libcudart --exclude-so libcudart --exclude-dir /usr/local/cuda-11.7/lib64/ && ln -sf libtorch_test.so.wosection.soldout libtorch_test.so
+    --check-output --exclude-so libcudart --exclude-so libcudart --exclude-dir
+    /usr/local/cuda-11.7/lib64/ && ln -sf libtorch_test.so.wosection.soldout
+    libtorch_test.so
   DEPENDS torch_test sold
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
