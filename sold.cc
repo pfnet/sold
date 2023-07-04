@@ -524,7 +524,8 @@ void Sold::LoadDynSymtab(ELFBinary* bin, std::vector<Syminfo>& symtab) {
 
         Syminfo* found = NULL;
         for (int i = 0; i < symtab.size(); i++) {
-            if (symtab[i].name == p.name && symtab[i].soname == p.soname && symtab[i].version == p.version) {
+            // if (symtab[i].name == p.name && symtab[i].soname == p.soname && symtab[i].version == p.version) {
+            if (symtab[i].name == p.name) {
                 found = &symtab[i];
                 break;
             }

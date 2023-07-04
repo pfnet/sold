@@ -14,6 +14,7 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include "version_builder.h"
+#include "utils.h"
 
 void VersionBuilder::Add(Elf_Versym versym, const std::string& soname, const std::string& version, StrtabBuilder& strtab,
                          const unsigned char st_info) {
@@ -29,12 +30,12 @@ void VersionBuilder::Add(Elf_Versym versym, const std::string& soname, const std
 
         vers.push_back(versym);
     } else {
-        CHECK(!soname.empty() && !version.empty()) << " versym=" << special_ver_ndx_to_str(versym);
+        // CHECK(!soname.empty() && !version.empty()) << SOLD_LOG_KEY(soname) << SOLD_LOG_KEY(version) << SOLD_LOG_KEY(versym);
 
         auto found_filename = soname_to_filename_.find(soname);
-        CHECK(found_filename != soname_to_filename_.end())
-            << soname << " does not exists in soname_to_filename." << SOLD_LOG_KEY(soname) << SOLD_LOG_KEY(version);
-        std::string filename = found_filename->second;
+        // CHECK(found_filename != soname_to_filename_.end())
+        //     << soname << " does not exists in soname_to_filename." << SOLD_LOG_KEY(soname) << SOLD_LOG_KEY(version);
+        std::string filename = found_filename != soname_to_filename_.end() ? found_filename->second : "";
 
         strtab.Add(filename);
         strtab.Add(version);
