@@ -29,15 +29,13 @@ add_custom_target(
     GLOG_log_dir=${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/sold -i
     ${CMAKE_CURRENT_BINARY_DIR}/libtorch_test.so.original -o
     ${CMAKE_CURRENT_BINARY_DIR}/libtorch_test.so.wosection.soldout
-    --check-output
-    libtorch_test.so
+    --check-output libtorch_test.so
   DEPENDS torch_test sold
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 add_custom_target(
   libtorch_test_so_symlink ALL
-  COMMAND
-    ln -sf libtorch_test.so.soldout libtorch_test.so
+  COMMAND ln -sf libtorch_test.so.soldout libtorch_test.so
   DEPENDS torch_test_soldout
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
