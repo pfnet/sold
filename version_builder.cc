@@ -30,9 +30,11 @@ void VersionBuilder::Add(Elf_Versym versym, const std::string& soname, const std
 
         vers.push_back(versym);
     } else {
+        // TODO (akawashiro): Revive this assertion
         // CHECK(!soname.empty() && !version.empty()) << SOLD_LOG_KEY(soname) << SOLD_LOG_KEY(version) << SOLD_LOG_KEY(versym);
 
         auto found_filename = soname_to_filename_.find(soname);
+        // TODO (akawashiro): Revive this assertion
         // CHECK(found_filename != soname_to_filename_.end())
         //     << soname << " does not exists in soname_to_filename." << SOLD_LOG_KEY(soname) << SOLD_LOG_KEY(version);
         std::string filename = found_filename != soname_to_filename_.end() ? found_filename->second : "";
