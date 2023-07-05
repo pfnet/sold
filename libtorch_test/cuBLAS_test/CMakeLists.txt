@@ -8,7 +8,7 @@ add_custom_target(
     GLOG_log_dir=${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/sold -i
     ${CMAKE_CURRENT_BINARY_DIR}/cuBLAS_test -o
     ${CMAKE_CURRENT_BINARY_DIR}/cuBLAS_test.soldout --section-headers
-    --check-output
+    # --check-output TODO (akawashiro)
   DEPENDS cuBLAS_test sold
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 

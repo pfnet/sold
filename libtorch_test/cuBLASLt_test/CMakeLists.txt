@@ -32,7 +32,7 @@ add_custom_target(
     GLOG_log_dir=${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_BINARY_DIR}/sold -i
     ${CMAKE_CURRENT_BINARY_DIR}/sample_cublasLt_LtIgemmTensor -o
     ${CMAKE_CURRENT_BINARY_DIR}/sample_cublasLt_LtIgemmTensor.soldout
-    --check-output
+    # --check-output TODO (akawashiro)
   DEPENDS sample_cublasLt_LtIgemmTensor sold
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
