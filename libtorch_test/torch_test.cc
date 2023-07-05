@@ -36,4 +36,7 @@ extern "C" void test() {
     b = at::mm(a1, a2);
 
     SLOG() << "All tests finished." << std::endl;
+
+    // TODO (akawashiro): Workaround
+    quick_exit(0);
 }
