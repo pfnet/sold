@@ -435,9 +435,8 @@ void Sold::CollectTLS() {
                 CHECK_LE(phdr->p_align, TLS_ALIGN) << SOLD_LOG_KEY(bin->filename());
 
                 uint8_t* start = reinterpret_cast<uint8_t*>(bin->GetPtr(phdr->p_vaddr));
-                size_t memsz = (phdr->p_memsz + (TLS_ALIGN - 1)) / TLS_ALIGN * TLS_ALIGN;
-                size_t filesz = (phdr->p_filesz + (TLS_ALIGN - 1)) / TLS_ALIGN * TLS_ALIGN;
-                uintptr_t file_offset = tls_.memsz;
+                const size_t memsz = (phdr->p_memsz + (TLS_ALIGN - 1)) / TLS_ALIGN * TLS_ALIGN;
+                const uintptr_t file_offset = tls_.memsz;
                 CHECK(tls_.bin_to_index.emplace(bin, tls_.data.size()).second);
                 tls_.data.emplace_back(TLS::Data{.bin = bin,
                                                  .start = start,
