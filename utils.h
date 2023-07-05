@@ -189,6 +189,7 @@ struct TLS {
         ELFBinary* bin;
         uint8_t* start;
         size_t size;
+        size_t padded_size;
         uintptr_t file_offset;
         uintptr_t bss_offset;
     };
