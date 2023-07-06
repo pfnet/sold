@@ -90,7 +90,6 @@ Note: You can generate libtorch using `./build-pytorch.sh`. This script install 
 ```
 git clone https://github.com/akawashiro/sold.git
 cd sold
-mkdir -p build
 cmake -DCMAKE_PREFIX_PATH=/absolute/path/to/libtorch/dir -DSOLD_LIBTORCH_TEST=ON -DSOLD_PYBIND_TEST=ON -GNinja -B build -S .
 cmake --build build
 ctest --test-dir build
