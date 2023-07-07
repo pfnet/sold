@@ -14,6 +14,6 @@ configs {
         time_limit: {
             seconds: 3600
         }
-        command: "bash .pfnci/run_gpu_test.sh"
+        command: "bash .pfnci/run_gpu_test_all.sh"
     }
 }
