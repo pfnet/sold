@@ -15,7 +15,7 @@ configs {
             seconds: 3600
         }
         environment_variables: { key: "OS" value: "ubuntu20.04" }
-        command: "bash .pfnci/run_gpu_test.sh"
+        command: "bash .pfnci/run_gpu_test_all.sh"
     }
 }
 configs {
