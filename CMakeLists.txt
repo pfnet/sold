@@ -1,12 +1,14 @@
 cmake_minimum_required(VERSION 3.4)
 project(sold LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
+
+add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Werror;-Wextra;-Wno-unused-parameter;-Wno-missing-braces;-Wno-sign-compare;-Wimplicit-fallthrough;-Wno-error=deprecated-declarations>")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 

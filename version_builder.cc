@@ -64,7 +64,7 @@ uintptr_t VersionBuilder::SizeVerneed() const {
     uintptr_t s = 0;
     for (const auto& m1 : data) {
         s += sizeof(Elf_Verneed);
-        for (const auto& m2 : m1.second) {
+        for (size_t i = 0; i < m1.second.size(); i++) {
             s += sizeof(Elf_Vernaux);
         }
     }

@@ -53,15 +53,15 @@ public:
     const Elf_Verneed* verneed() const { return verneed_; }
     Elf_Verneed* verneed_mut() const { return verneed_; }
     const Elf_Versym* versym() const { return versym_; }
-    const Elf_Xword verneednum() const { return verneednum_; }
+    Elf_Xword verneednum() const { return verneednum_; }
     const Elf_Rel* rel() const { return rel_; }
     size_t num_rels() const { return num_rels_; }
     const Elf_Rel* plt_rel() const { return plt_rel_; }
     size_t num_plt_rels() const { return num_plt_rels_; }
     const EHFrameHeader* eh_frame_header() const { return &eh_frame_header_; }
     const char* strtab() const { return strtab_; }
-    const size_t dt_strtab() const { return dt_strtab_; }
-    const size_t strsz() const { return strsz_; }
+    size_t dt_strtab() const { return dt_strtab_; }
+    size_t strsz() const { return strsz_; }
 
     const char* head() const { return head_; }
     char* head_mut() const { return head_; }
@@ -72,8 +72,8 @@ public:
 
     uintptr_t init() const { return init_; }
     uintptr_t fini() const { return fini_; }
-    const uintptr_t init_array_addr() const { return init_array_addr_; };
-    const uintptr_t fini_array_addr() const { return fini_array_addr_; };
+    uintptr_t init_array_addr() const { return init_array_addr_; };
+    uintptr_t fini_array_addr() const { return fini_array_addr_; };
     const std::vector<uintptr_t>& init_array() const { return init_array_; }
     const std::vector<uintptr_t>& fini_array() const { return fini_array_; }
 
