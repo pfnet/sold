@@ -15,7 +15,6 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y \
     python3 \
     python3-pip \
-    cmake \
     clang-format \
     rsync \
     git \
@@ -27,6 +26,8 @@ apt-get update && apt-get install -y \
     wget \
     unzip
 
+# Default cmake version in Ubuntu22.04
+pip3 install cmake==3.22.1
 pip3 install pytest numpy cmake-format
 ./run-format.sh
 
