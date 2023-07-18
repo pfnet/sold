@@ -15,7 +15,7 @@ for s in ${sos}
 do
     PRE_IFS=$IFS
     IFS=$'\n'
-    for l in `readelf -s $s | grep -e ${sym} | grep -v UND`
+    for l in `readelf -s $s --wide | grep -e ${sym} | grep -v UND`
     do
         echo ${l} in ${s}
     done
