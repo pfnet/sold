@@ -8,14 +8,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RelWithDebInfo")
 endif()
 
-add_compile_options(
-  -Wall -Werror -Wextra
-  -Wno-unused-parameter
-  -Wno-missing-braces
-  -Wno-sign-compare
-  -Wimplicit-fallthrough
-  -Wno-error=deprecated-declarations
-  )
+add_compile_options("$<$<COMPILE_LANGUAGE:CXX>:-Wall;-Werror;-Wextra;-Wno-unused-parameter;-Wno-missing-braces;-Wno-sign-compare;-Wimplicit-fallthrough;-Wno-error=deprecated-declarations>")
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
