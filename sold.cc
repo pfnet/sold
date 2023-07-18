@@ -198,9 +198,9 @@ std::string Sold::BuildRunpath() {
     std::string runpath;
     for (const ELFBinary* b : link_binaries_) {
         std::vector<std::string> runpaths = SplitString(b->runpath(), ":");
-        for (const auto rp : runpaths) {
+        for (const auto &rp : runpaths) {
             bool matched = false;
-            for (const auto pattern : exclude_runpath_pattern_) {
+            for (const auto &pattern : exclude_runpath_pattern_) {
                 if (rp.find(pattern) != std::string::npos) matched = true;
             }
             if (!matched) {
@@ -587,7 +587,6 @@ void Sold::RelocateSymbol_x86_64(ELFBinary* bin, const Elf_Rel* rel, uintptr_t o
     std::tie(soname, version_name) = bin->GetVersion(ELF_R_SYM(rel->r_info), filename_to_soname_);
 
     int type = ELF_R_TYPE(rel->r_info);
-    const uintptr_t addend = rel->r_addend;
     std::vector<Elf_Rel> newrels;
 
     if (bin->IsVaddrInTLSData(rel->r_offset)) {
@@ -781,7 +780,6 @@ void Sold::RelocateSymbol_aarch64(ELFBinary* bin, const Elf_Rel* rel, uintptr_t 
     std::tie(soname, version_name) = bin->GetVersion(ELF_R_SYM(rel->r_info), filename_to_soname_);
 
     int type = ELF_R_TYPE(rel->r_info);
-    const uintptr_t addend = rel->r_addend;
     std::vector<Elf_Rel> newrels;
 
     if (bin->IsVaddrInTLSData(rel->r_offset)) {

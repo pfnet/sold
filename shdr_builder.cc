@@ -99,7 +99,7 @@ void ShdrBuilder::Freeze() {
 }
 
 void ShdrBuilder::RegisterShdr(Elf_Off offset, uint64_t size, ShdrType type, uint64_t entsize, Elf_Word info) {
-    Elf_Shdr shdr = {0};
+    Elf_Shdr shdr = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     shdr.sh_name = GetShName(type);
     shdr.sh_offset = offset;
     shdr.sh_addr = offset;
