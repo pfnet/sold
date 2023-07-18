@@ -107,7 +107,6 @@ private:
     uintptr_t CodeSize() {
         uintptr_t p = 0;
         for (const Load& load : loads_) {
-            ELFBinary* bin = load.bin;
             Elf_Phdr* phdr = load.orig;
             p += (load.emit.p_offset + phdr->p_filesz);
         }

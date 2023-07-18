@@ -40,7 +40,18 @@ private:
         {TLS, ".tls"}};
 
     // The first section header must be NULL.
-    std::vector<Elf_Shdr> shdrs = {Elf_Shdr{0}};
+    std::vector<Elf_Shdr> shdrs = {Elf_Shdr{
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    }};
     uint32_t GetShName(ShdrType type) const;
     uint32_t GetIndex(ShdrType type) const;
 };
