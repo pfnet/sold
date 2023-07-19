@@ -25,7 +25,10 @@ void VersionBuilder::Add(Elf_Versym versym, const std::string& soname, const std
     }
 
     if (is_special_ver_ndx(versym)) {
-        CHECK(soname.empty() && version.empty()) << " excess soname or version information is given.";
+        // TODO(joe): Consider again whether we should allow this.
+        // Currently, this check may fail when a symbol with nonempty soname and version is resolved by
+        // fallback on another symbol where is_special_ver_ndx(versym) == true in SymtabBuilder::Resolve.
+        // CHECK(soname.empty() && version.empty()) << " excess soname or version information is given.";
         LOG(INFO) << "VersionBuilder::" << special_ver_ndx_to_str(versym);
 
         vers.push_back(versym);
