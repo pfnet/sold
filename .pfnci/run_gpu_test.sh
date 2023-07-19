@@ -5,16 +5,16 @@ LIBTORCH_VERSION=${LIBTORCH_VERSION:-1.13.0}
 LIBTORCH_ARCH=${LIBTORCH_ARCH:-cu117}
 OS=${OS:-ubuntu22.04}
 
-cat >> test.sh <<'EOF'
+cat > test.sh <<'EOF'
 #!/bin/bash
 set -eux
 
 nvidia-smi
 
+export DEBIAN_FRONTEND=noninteractive
 apt-get update && apt-get install -y \
     python3 \
     python3-pip \
-    cmake \
     clang-format \
     rsync \
     git \
@@ -26,17 +26,24 @@ apt-get update && apt-get install -y \
     wget \
     unzip
 
+# Default cmake version in Ubuntu22.04
+pip3 install cmake==3.22.1
 pip3 install pytest numpy cmake-format
 ./run-format.sh
-./download-libtorch.sh
+
+rm -rf build
+mkdir build
+cd build
+
+../download-libtorch.sh
 LIBTORCH_DIR=$(pwd)/pytorch-install/libtorch
 
-mkdir build && cd build && \
-    cmake .. \
-        -GNinja \
-        -DSOLD_PYBIND_TEST=ON \
-        -DSOLD_LIBTORCH_TEST=ON \
-        -DCMAKE_PREFIX_PATH=${LIBTORCH_DIR}/share/cmake/Torch/
+cmake .. \
+    -GNinja \
+    -DSOLD_PYBIND_TEST=ON \
+    -DSOLD_LIBTORCH_TEST=ON \
+    -DCMAKE_PREFIX_PATH=${LIBTORCH_DIR}/share/cmake/Torch/
+
 ninja
 
 ctest --output-on-failure

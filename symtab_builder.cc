@@ -85,11 +85,18 @@ bool SymtabBuilder::Resolve(const std::string& name, const std::string& soname, 
             if (found != src_syms_.end()) {
                 versym = found->second.first;
                 symp = found->second.second;
-            } else {
+            } else if (!soname.empty() && !version.empty()) {
                 auto found_fallback = src_fallback_syms_.find(name);
                 if (found_fallback != src_fallback_syms_.end()) {
                     LOG(INFO) << "Use fallback version of " << name;
                     versym = found_fallback->second.first;
+                    symp = found_fallback->second.second;
+                }
+            } else {
+                auto found_fallback = src_fallback_syms_.find(name);
+                if (found_fallback != src_fallback_syms_.end()) {
+                    LOG(INFO) << "Use NO_VERSION_INFO for " << name;
+                    versym = NO_VERSION_INFO;
                     symp = found_fallback->second.second;
                 }
             }

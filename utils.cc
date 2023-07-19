@@ -440,7 +440,7 @@ std::ostream& operator<<(std::ostream& os, const Elf_Rel& r) {
 }
 
 bool is_special_ver_ndx(Elf64_Versym versym) {
-    return (versym == VER_NDX_LOCAL || versym == VER_NDX_GLOBAL);
+    return (versym == VER_NDX_LOCAL || versym == VER_NDX_GLOBAL || versym == NO_VERSION_INFO);
 }
 
 std::string special_ver_ndx_to_str(Elf64_Versym versym) {
