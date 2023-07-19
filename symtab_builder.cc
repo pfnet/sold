@@ -42,12 +42,16 @@ void SymtabBuilder::SetSrcSyms(std::vector<Syminfo> syms) {
         // unique symbols therefore found == src_syms_.end() is true always.
         if (found == src_syms_.end() || found->second.second == NULL || !IsDefined(*found->second.second)) {
             src_syms_[{s.name, s.soname, s.version}] = {s.versym, s.sym};
+            LOG(INFO) << "SymtabBuilder set src_syms_:" << SOLD_LOG_KEY(s.name) << SOLD_LOG_KEY(s.soname) << SOLD_LOG_KEY(s.version)
+                      << SOLD_LOG_KEY(s.versym);
         }
 
         auto found_fallback = src_fallback_syms_.find(s.name);
         if ((s.versym & VERSYM_HIDDEN) == 0 && (found_fallback == src_fallback_syms_.end() || found_fallback->second.second == NULL ||
                                                 !IsDefined(*found_fallback->second.second))) {
             src_fallback_syms_[s.name] = {s.versym, s.sym};
+            LOG(INFO) << "SymtabBuilder set src_fallback_syms_:" << SOLD_LOG_KEY(s.name) << SOLD_LOG_KEY(s.soname)
+                      << SOLD_LOG_KEY(s.version) << SOLD_LOG_KEY(s.versym);
         }
     }
 }
@@ -85,12 +89,27 @@ bool SymtabBuilder::Resolve(const std::string& name, const std::string& soname, 
             if (found != src_syms_.end()) {
                 versym = found->second.first;
                 symp = found->second.second;
+                LOG(INFO) << "Found src_syms_:" << SOLD_LOG_KEY(name) << SOLD_LOG_KEY(soname) << SOLD_LOG_KEY(version)
+                          << ", resolved version:" << SOLD_LOG_KEY(versym);
             } else {
                 auto found_fallback = src_fallback_syms_.find(name);
                 if (found_fallback != src_fallback_syms_.end()) {
-                    LOG(INFO) << "Use fallback version of " << name;
                     versym = found_fallback->second.first;
                     symp = found_fallback->second.second;
+                    LOG(INFO) << "Use fallback version: " << SOLD_LOG_KEY(name) << SOLD_LOG_KEY(soname) << SOLD_LOG_KEY(version)
+                              << ", resolved version:" << SOLD_LOG_KEY(versym);
+
+                    // TODO(joe): Check whether this is correct behavior or not.
+                    // We have so far disabled this kind of checks in
+                    // https://github.com/pfnet/sold/pull/6 and
+                    // https://github.com/pfnet/sold/pull/15.
+                    // If the following behavior is correct, we have to revive the checks.
+                    if (is_special_ver_ndx(versym) != (soname.empty() && version.empty())) {
+                        LOG(WARNING) << "Unexpected combination of versym, soname, and version. "
+                                     << "A symbol is expected to have special versym iff its soname and version are empty. "
+                                     << "Resoved:" << SOLD_LOG_KEY(name) << SOLD_LOG_KEY(soname) << SOLD_LOG_KEY(version)
+                                     << SOLD_LOG_KEY(versym);
+                    }
                 }
             }
         }
