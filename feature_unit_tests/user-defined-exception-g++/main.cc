@@ -1,13 +1,10 @@
-#include "hoge.h"
+#include "fuga.h"
 
 int main() {
-    std::cout << "catch_exception" << std::endl;
-    catch_exception_hoge();
-
-    std::cout << "throw_exception" << std::endl;
+    catch_exception_fuga();
     try {
-        throw_exception_hoge();
-    } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
+        throw_exception_fuga();
+    } catch (CustomException& e) {
+        std::cout << "Caught CustomException" << std::endl;
     }
 }
