@@ -1,7 +1,5 @@
 #include "fuga.h"
 
-struct CustomException {};
-
 void throw_exception_fuga() {
     throw CustomException();
 }

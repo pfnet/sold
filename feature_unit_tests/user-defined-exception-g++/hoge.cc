@@ -14,7 +14,7 @@ void catch_exception_hoge() {
 
     try {
         throw_exception_fuga();
-    } catch (std::exception& e) {
-        std::cout << e.what() << std::endl;
+    } catch (CustomException &e) {
+        std::cout << "CustomException" << std::endl;
     }
 }
