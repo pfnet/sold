@@ -1,5 +1,5 @@
 configs {
-    key: "sold.gpu",
+    key: "sold.ubuntu2004"
     value {
         requirement {
             cpu: 8
@@ -14,6 +14,27 @@ configs {
         time_limit: {
             seconds: 3600
         }
-        command: "bash .pfnci/run_gpu_test.sh"
+        environment_variables: { key: "OS" value: "ubuntu20.04" }
+        command: "bash .pfnci/run_gpu_test_all.sh"
+    }
+}
+configs {
+    key: "sold.ubuntu2204"
+    value {
+        requirement {
+            cpu: 8
+            memory: 32
+            disk: 50
+            gpu: 1
+        }
+        checkout_strategy {
+            ignore_gitignore: true
+            include_dot_git: true
+        }
+        time_limit: {
+            seconds: 3600
+        }
+        environment_variables: { key: "OS" value: "ubuntu22.04" }
+        command: "bash .pfnci/run_gpu_test_all.sh"
     }
 }
