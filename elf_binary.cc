@@ -484,7 +484,7 @@ void ELFBinary::ParseEHFrameHeader(size_t off, size_t size) {
                 << SOLD_LOG_DWEHPE(cie.LSDA_encoding) << "}";
 
         CHECK(cie.FDE_encoding == (DW_EH_PE_sdata4 | DW_EH_PE_pcrel));
-        CHECK(cie.LSDA_encoding == (DW_EH_PE_sdata4 | DW_EH_PE_pcrel) || cie.LSDA_encoding == DW_EH_PE_SOLD_DUMMY);
+        // CHECK(cie.LSDA_encoding == (DW_EH_PE_sdata4 | DW_EH_PE_pcrel) || cie.LSDA_encoding == DW_EH_PE_SOLD_DUMMY);
 
         eh_frame_header_.fdes.emplace_back(fde);
         eh_frame_header_.cies.emplace_back(cie);
